@@ -1,0 +1,28 @@
+# Configuration for ${project.name}
+#
+# Version: ${project.version}
+
+plugin-prefix: '&aAdverts &8>> '
+debug-enabled: false
+
+# Whether or not to require an AdvancedRegionMarket market.
+require-arm-market: false
+
+# Cache auto save.
+auto-save:
+  enabled: true
+  # Interval in seconds.
+  interval: 600
+
+adverts:
+  # Advert interval in seconds.
+  interval: 300
+  # Expiration time in seconds.
+  expiration-time: 86400
+  # How many adverts can one player have?
+  limit: 1
+
+# Time formats.
+formats:
+  date: 'd.M. H:m:s'
+  duration: 'H:m:s'

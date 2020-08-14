@@ -1,0 +1,8 @@
+name: ${project.name}
+version: ${project.version}
+main: space.devport.wertik.advertisements.AdvertPlugin
+authors: [Wertik1206]
+softdepend: [AdvancedRegionMarket, PlaceholderAPI]
+commands:
+  advertisements:
+    aliases: [ad, ads, advert, adverts, advertisement]
