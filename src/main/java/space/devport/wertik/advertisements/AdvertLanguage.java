@@ -28,7 +28,7 @@ public class AdvertLanguage extends LanguageDefaults {
 
         addDefault("Commands.Cancel.Done", "&7Cancelled advert &f%name% &7owned by &f%player%");
 
-        addDefault("Placeholders.true", "true");
-        addDefault("Placeholders.false", "false");
+        addDefault("Placeholders.Value-True", "yes");
+        addDefault("Placeholders.Value-False", "no");
     }
 }

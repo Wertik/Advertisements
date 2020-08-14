@@ -39,9 +39,9 @@ public class AdvertExpansion extends PlaceholderExpansion {
             switch (arr[0].toLowerCase()) {
                 case "hasmarket":
                     if (plugin.getBridge() == null) return "no_arm";
-                    return plugin.getLanguageManager().get("Placeholders." + plugin.getBridge().hasMarket(player)).color().toString();
+                    return getBooleanValue(plugin.getBridge().hasMarket(player));
                 case "hasadverts":
-                    return plugin.getLanguageManager().get("Placeholders." + plugin.getAdvertManager().hasAdverts(player)).color().toString();
+                    return getBooleanValue(plugin.getAdvertManager().hasAdverts(player));
                 case "adverts":
                     if (arr.length > 1)
                         if (arr[1].equalsIgnoreCase("count"))
@@ -51,7 +51,7 @@ public class AdvertExpansion extends PlaceholderExpansion {
                     return plugin.getAdvertManager().getAdverts(player).stream().map(Advert::getName).collect(Collectors.joining(", "));
                 case "hasadvert":
                     if (arr.length < 2) return "not_enough_args";
-                    return plugin.getLanguageManager().get("Placeholders." + plugin.getAdvertManager().getAdvertAccount(player).hasAdvert(arr[1])).color().toString();
+                    return getBooleanValue(plugin.getAdvertManager().getAdvertAccount(player).hasAdvert(arr[1]));
                 case "expire":
                     if (arr.length < 3) return "not_enough_args";
                     Advert advert = plugin.getAdvertManager().getAdvert(player, arr[1]);
@@ -69,6 +69,10 @@ public class AdvertExpansion extends PlaceholderExpansion {
             }
 
         return "invalid_params";
+    }
+
+    public String getBooleanValue(boolean bool) {
+        return plugin.getLanguageManager().get("Placeholders." + (bool ? "Value-True" : "Value-False")).color().toString();
     }
 
     @Override

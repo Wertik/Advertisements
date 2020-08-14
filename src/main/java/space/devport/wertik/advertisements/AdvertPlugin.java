@@ -1,6 +1,9 @@
 package space.devport.wertik.advertisements;
 
 import lombok.Getter;
+import me.clip.placeholderapi.PlaceholderAPI;
+import me.clip.placeholderapi.PlaceholderAPIPlugin;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import space.devport.utils.DevportPlugin;
 import space.devport.wertik.advertisements.bridge.ARMBridge;
 import space.devport.wertik.advertisements.commands.AdvertsCommand;
@@ -55,9 +58,31 @@ public class AdvertPlugin extends DevportPlugin {
 
     private void setupPAPI() {
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+
+            if (PlaceholderAPI.isRegistered("adverts") && compileVersionNumber(PlaceholderAPIPlugin.getInstance().getDescription().getVersion()) >= 2109) {
+                PlaceholderExpansion expansion = PlaceholderAPIPlugin.getInstance().getLocalExpansionManager().getExpansion("adverts");
+
+                if (expansion != null) {
+                    if (compileVersionNumber(expansion.getVersion()) < compileVersionNumber(getDescription().getVersion())) {
+                        expansion.unregister();
+                        consoleOutput.info("Unregistered old expansion version...");
+                    }
+                }
+            }
+
             new AdvertExpansion(this).register();
             consoleOutput.info("Found PlaceholderAPI! &aRegistering expansion.");
         }
+    }
+
+    private int compileVersionNumber(String version) {
+        int versionNumber = 0;
+        try {
+            versionNumber = Integer.parseInt(version.replace("\\.", ""));
+        } catch (NumberFormatException e) {
+            consoleOutput.debug("Not common version string.");
+        }
+        return versionNumber;
     }
 
     private void setupARM() {
