@@ -29,7 +29,11 @@ public class AdvertAccount {
         while (advertIterator.hasNext()) {
             Advert advert = advertIterator.next();
 
-            if (advert.isExpired() || (AdvertPlugin.getInstance().getBridge() != null && !AdvertPlugin.getInstance().getBridge().hasMarket(owner))) {
+            if (advert.isExpired() ||
+                    (AdvertPlugin.getInstance().getConfig().getBoolean("require-arm-market", false) &&
+                            AdvertPlugin.getInstance().getBridge() != null &&
+                            !AdvertPlugin.getInstance().getBridge().hasMarket(owner))) {
+
                 advertIterator.remove();
                 advert.sendExpireNotification();
 
@@ -39,6 +43,7 @@ public class AdvertAccount {
     }
 
     public void removeAdvert(String advertName) {
+        removeInvalid();
         Iterator<Advert> advertIterator = adverts.iterator();
         while (advertIterator.hasNext()) {
             Advert advert = advertIterator.next();
@@ -58,18 +63,22 @@ public class AdvertAccount {
     }
 
     public void addAdvert(Advert advert) {
+        removeInvalid();
         adverts.add(advert);
     }
 
     public boolean hasAdvert(String name) {
+        removeInvalid();
         return adverts.stream().anyMatch(a -> a.getName().equals(name));
     }
 
     public boolean hasAdverts() {
+        removeInvalid();
         return !adverts.isEmpty();
     }
 
     public boolean hasMax() {
+        removeInvalid();
         return adverts.size() >= AdvertPlugin.getInstance().getConfig().getInt("adverts.limit", 1);
     }
 }

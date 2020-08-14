@@ -44,6 +44,8 @@ public class InfoSubCommand extends SubCommand {
 
         AdvertAccount account = AdvertPlugin.getInstance().getAdvertManager().getAdvertAccount(target);
 
+        account.removeInvalid();
+
         if (!account.hasAdverts()) {
             language.getPrefixed(others ? "Commands.None-Others" : "Commands.None")
                     .replace("&f%player%", target.getName())

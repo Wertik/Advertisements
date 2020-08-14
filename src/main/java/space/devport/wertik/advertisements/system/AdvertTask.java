@@ -104,6 +104,8 @@ public class AdvertTask implements Runnable {
 
         advert.send();
         AdvertPlugin.getInstance().getConsoleOutput().debug("Sent message for " + advert.getName() + " and updated queue.");
+
+        plugin.getAdvertManager().getAdvertAccount(advert.getOwner()).removeInvalid();
     }
 
     public boolean isRunning() {

@@ -6,9 +6,15 @@
 
     <groupId>space.devport.wertik.advertisements</groupId>
     <artifactId>Advertisements</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.5</version>
 
     <name>Advertisements</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
 
     <build>
         <defaultGoal>clean install</defaultGoal>

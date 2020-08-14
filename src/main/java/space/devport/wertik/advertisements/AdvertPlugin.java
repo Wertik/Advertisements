@@ -1,7 +1,6 @@
 package space.devport.wertik.advertisements;
 
 import lombok.Getter;
-import me.clip.placeholderapi.PlaceholderAPI;
 import space.devport.utils.DevportPlugin;
 import space.devport.wertik.advertisements.bridge.ARMBridge;
 import space.devport.wertik.advertisements.commands.AdvertsCommand;
@@ -34,8 +33,6 @@ public class AdvertPlugin extends DevportPlugin {
     public void onPluginEnable() {
         instance = this;
 
-        consoleOutput.setColors(true);
-
         loadOptions();
 
         advertManager = new AdvertManager(this);
@@ -57,14 +54,15 @@ public class AdvertPlugin extends DevportPlugin {
     }
 
     private void setupPAPI() {
-        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null && !PlaceholderAPI.isRegistered("adverts")) {
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new AdvertExpansion(this).register();
             consoleOutput.info("Found PlaceholderAPI! &aRegistering expansion.");
         }
     }
 
     private void setupARM() {
-        if (getServer().getPluginManager().getPlugin("AdvancedRegionMarket") != null && bridge == null) {
+        if (getServer().getPluginManager().getPlugin("AdvancedRegionMarket") != null) {
+            if (bridge != null) return;
             consoleOutput.info("Found &aAdvanced Region Market &7v&f" + getServer().getPluginManager().getPlugin("AdvancedRegionMarket").getDescription().getVersion());
             bridge = new ARMBridge();
             bridge.build();

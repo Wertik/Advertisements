@@ -16,13 +16,13 @@ auto-save:
 
 adverts:
   # Advert interval in seconds.
-  interval: 300
+  interval: 30
   # Expiration time in seconds.
-  expiration-time: 86400
+  expiration-time: 120
   # How many adverts can one player have?
   limit: 1
 
 # Time formats.
 formats:
-  date: 'd.M. H:m:s'
-  duration: 'H:m:s'
+  date: 'd.M. HH:mm:ss'
+  duration: 'HH:mm:ss'
