@@ -13,8 +13,8 @@ public class AutoSaveTask implements Runnable {
     // ticks
     private int interval;
 
-    public AutoSaveTask() {
-        this.plugin = AdvertPlugin.getInstance();
+    public AutoSaveTask(AdvertPlugin plugin) {
+        this.plugin = plugin;
     }
 
     public void load() {

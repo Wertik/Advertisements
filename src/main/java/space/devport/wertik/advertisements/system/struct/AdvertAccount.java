@@ -3,6 +3,7 @@ package space.devport.wertik.advertisements.system.struct;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import space.devport.wertik.advertisements.AdvertPlugin;
+import space.devport.wertik.advertisements.bridge.RegionMarketBridge;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,13 +32,12 @@ public class AdvertAccount {
 
             if (advert.isExpired() ||
                     (AdvertPlugin.getInstance().getConfig().getBoolean("require-arm-market", false) &&
-                            AdvertPlugin.getInstance().getBridge() != null &&
-                            !AdvertPlugin.getInstance().getBridge().hasMarket(owner))) {
+                            RegionMarketBridge.getInstance().hasMarket(owner))) {
 
                 advertIterator.remove();
                 advert.sendExpireNotification();
 
-                AdvertPlugin.getInstance().getAdvertManager().getAdvertTask().removeAdvert(advert);
+                AdvertPlugin.getPlugin(AdvertPlugin.class).getAdvertManager().unScheduleAdvert(advert);
             }
         }
     }
@@ -45,6 +45,7 @@ public class AdvertAccount {
     public void removeAdvert(String advertName) {
         removeInvalid();
         Iterator<Advert> advertIterator = adverts.iterator();
+
         while (advertIterator.hasNext()) {
             Advert advert = advertIterator.next();
 
@@ -52,7 +53,7 @@ public class AdvertAccount {
                 advertIterator.remove();
                 advert.sendExpireNotification();
 
-                AdvertPlugin.getInstance().getAdvertManager().getAdvertTask().removeAdvert(advert);
+                AdvertPlugin.getPlugin(AdvertPlugin.class).getAdvertManager().unScheduleAdvert(advert);
             }
         }
     }

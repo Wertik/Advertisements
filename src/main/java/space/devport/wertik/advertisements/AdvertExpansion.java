@@ -5,6 +5,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import space.devport.wertik.advertisements.bridge.RegionMarketBridge;
 import space.devport.wertik.advertisements.system.struct.Advert;
 
 import java.util.Date;
@@ -38,8 +39,8 @@ public class AdvertExpansion extends PlaceholderExpansion {
         if (arr.length > 0)
             switch (arr[0].toLowerCase()) {
                 case "hasmarket":
-                    if (plugin.getBridge() == null) return "no_arm";
-                    return getBooleanValue(plugin.getBridge().hasMarket(player));
+                    if (!RegionMarketBridge.getInstance().isHooked()) return "no_arm";
+                    return getBooleanValue(RegionMarketBridge.getInstance().hasMarket(player));
                 case "hasadverts":
                     return getBooleanValue(plugin.getAdvertManager().hasAdverts(player));
                 case "adverts":
@@ -76,17 +77,20 @@ public class AdvertExpansion extends PlaceholderExpansion {
     }
 
     @Override
-    public @NotNull String getIdentifier() {
+    public @NotNull
+    String getIdentifier() {
         return "adverts";
     }
 
     @Override
-    public @NotNull String getAuthor() {
+    public @NotNull
+    String getAuthor() {
         return String.join(", ", plugin.getDescription().getAuthors());
     }
 
     @Override
-    public @NotNull String getVersion() {
+    public @NotNull
+    String getVersion() {
         return plugin.getDescription().getVersion();
     }
 }

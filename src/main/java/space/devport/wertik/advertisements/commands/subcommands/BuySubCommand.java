@@ -4,23 +4,17 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import space.devport.utils.commands.SubCommand;
 import space.devport.utils.commands.struct.ArgumentRange;
 import space.devport.utils.commands.struct.CommandResult;
-import space.devport.utils.commands.struct.Preconditions;
 import space.devport.wertik.advertisements.AdvertPlugin;
-import space.devport.wertik.advertisements.commands.CommandUtils;
+import space.devport.wertik.advertisements.bridge.RegionMarketBridge;
+import space.devport.wertik.advertisements.commands.AdvertSubCommand;
 import space.devport.wertik.advertisements.system.struct.AdvertAccount;
 
-public class BuySubCommand extends SubCommand {
+public class BuySubCommand extends AdvertSubCommand {
 
-    private final AdvertPlugin plugin;
-
-    public BuySubCommand() {
-        super("buy");
-        this.plugin = AdvertPlugin.getInstance();
-        this.preconditions = new Preconditions()
-                .permissions("advertisements.buy");
+    public BuySubCommand(AdvertPlugin plugin) {
+        super(plugin, "buy");
     }
 
     @Override
@@ -30,7 +24,7 @@ public class BuySubCommand extends SubCommand {
 
         OfflinePlayer target;
         if (args.length > 1) {
-            target = CommandUtils.getTargetPlayer(sender, args[1]);
+            target = getPlugin().getCommandParser().parsePlayer(sender, args[1]);
 
             if (target == null) return CommandResult.FAILURE;
             others = true;
@@ -40,24 +34,24 @@ public class BuySubCommand extends SubCommand {
             target = (Player) sender;
         }
 
-        if (plugin.getConfig().getBoolean("require-arm-market", false)) {
-            if (plugin.getBridge() == null) {
+        if (getPlugin().getConfig().getBoolean("require-arm-market", false)) {
+            if (!RegionMarketBridge.getInstance().isHooked()) {
                 language.sendPrefixed(sender, "Commands.ARM-Not-Hooked");
                 return CommandResult.FAILURE;
             }
 
-            if (!plugin.getBridge().hasMarket(target)) {
+            if (!RegionMarketBridge.getInstance().hasMarket(target)) {
                 language.sendPrefixed(sender, "Commands.Buy.No-Market");
                 return CommandResult.FAILURE;
             }
         }
 
-        AdvertAccount account = plugin.getAdvertManager().getAdvertAccount(target);
+        AdvertAccount account = getPlugin().getAdvertManager().getAdvertAccount(target);
 
         if (account.hasMax()) {
             language.getPrefixed("Commands.Buy.Limit-Reached")
                     .replace("%amount%", account.getAdverts().size())
-                    .replace("%max%", plugin.getConfig().getInt("adverts.limit", 1))
+                    .replace("%max%", getPlugin().getConfig().getInt("adverts.limit", 1))
                     .send(sender);
             return CommandResult.FAILURE;
         }
@@ -69,7 +63,7 @@ public class BuySubCommand extends SubCommand {
             return CommandResult.FAILURE;
         }
 
-        if (!plugin.getAdvertManager().createAdvert(target, args[0])) {
+        if (!getPlugin().getAdvertManager().createAdvert(target, args[0])) {
             language.sendPrefixed(sender, "Commands.Buy.Could-Not-Create");
             return CommandResult.FAILURE;
         }

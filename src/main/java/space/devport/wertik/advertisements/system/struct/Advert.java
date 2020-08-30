@@ -24,12 +24,6 @@ public class Advert {
     @Setter
     private long expirationTime;
 
-    public Advert(UUID owner, String name) {
-        this.owner = owner;
-        this.name = name;
-        this.expirationTime = System.currentTimeMillis() + (AdvertPlugin.getInstance().getConfig().getInt("adverts.expiration-time", 86400) * 1000);
-    }
-
     public Advert(UUID owner, String name, long expirationTime) {
         this.owner = owner;
         this.name = name;

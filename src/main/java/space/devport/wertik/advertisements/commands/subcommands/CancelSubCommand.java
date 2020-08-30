@@ -4,23 +4,16 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import space.devport.utils.commands.SubCommand;
 import space.devport.utils.commands.struct.ArgumentRange;
 import space.devport.utils.commands.struct.CommandResult;
-import space.devport.utils.commands.struct.Preconditions;
 import space.devport.wertik.advertisements.AdvertPlugin;
-import space.devport.wertik.advertisements.commands.CommandUtils;
+import space.devport.wertik.advertisements.commands.AdvertSubCommand;
 import space.devport.wertik.advertisements.system.struct.AdvertAccount;
 
-public class CancelSubCommand extends SubCommand {
+public class CancelSubCommand extends AdvertSubCommand {
 
-    private final AdvertPlugin plugin;
-
-    public CancelSubCommand() {
-        super("cancel");
-        this.plugin = AdvertPlugin.getInstance();
-        this.preconditions = new Preconditions()
-                .permissions("advertisements.cancel");
+    public CancelSubCommand(AdvertPlugin plugin) {
+        super(plugin, "cancel");
     }
 
     @Override
@@ -30,7 +23,7 @@ public class CancelSubCommand extends SubCommand {
 
         OfflinePlayer target;
         if (args.length > 1) {
-            target = CommandUtils.getTargetPlayer(sender, args[1]);
+            target = getPlugin().getCommandParser().parsePlayer(sender, args[1]);
 
             if (target == null) return CommandResult.FAILURE;
 
@@ -43,7 +36,7 @@ public class CancelSubCommand extends SubCommand {
             target = (Player) sender;
         }
 
-        AdvertAccount account = plugin.getAdvertManager().getAdvertAccount(target);
+        AdvertAccount account = getPlugin().getAdvertManager().getAdvertAccount(target);
 
         if (!account.hasAdvert(args[0])) {
             language.getPrefixed(others ? "Commands.None-Others" : "Commands.None")

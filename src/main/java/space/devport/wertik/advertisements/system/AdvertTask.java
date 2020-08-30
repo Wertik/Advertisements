@@ -17,11 +17,10 @@ public class AdvertTask implements Runnable {
 
     // ticks
     private int interval;
-
     private BukkitTask task;
 
-    public AdvertTask() {
-        this.plugin = AdvertPlugin.getInstance();
+    public AdvertTask(AdvertPlugin plugin) {
+        this.plugin = plugin;
     }
 
     public void load() {
@@ -91,19 +90,19 @@ public class AdvertTask implements Runnable {
 
         if (loadedAdverts.isEmpty())
             if (!queueAdverts()) {
-                AdvertPlugin.getInstance().getConsoleOutput().debug("Could not fetch any adverts.");
+                plugin.getConsoleOutput().debug("Could not fetch any adverts.");
                 return;
             }
 
         Advert advert = getNext();
 
         if (advert == null) {
-            AdvertPlugin.getInstance().getConsoleOutput().debug("There's no next advert.");
+            plugin.getConsoleOutput().debug("There's no next advert.");
             return;
         }
 
         advert.send();
-        AdvertPlugin.getInstance().getConsoleOutput().debug("Sent message for " + advert.getName() + " and updated queue.");
+        plugin.getConsoleOutput().debug("Sent message for " + advert.getName() + " and updated queue.");
 
         plugin.getAdvertManager().getAdvertAccount(advert.getOwner()).removeInvalid();
     }

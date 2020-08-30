@@ -39,7 +39,7 @@ public class AdvertManager {
 
     public void startAutoSave() {
         if (plugin.getConfig().getBoolean("auto-save.enabled")) {
-            autoSave = new AutoSaveTask();
+            autoSave = new AutoSaveTask(plugin);
             autoSave.load();
             autoSave.start();
         }
@@ -59,7 +59,7 @@ public class AdvertManager {
 
     public void startAdvertTask() {
         if (advertTask == null) {
-            advertTask = new AdvertTask();
+            advertTask = new AdvertTask(plugin);
             advertTask.load();
         }
 
@@ -154,7 +154,9 @@ public class AdvertManager {
 
         if (advertAccount.hasAdvert(name) || advertAccount.hasMax()) return false;
 
-        Advert advert = new Advert(uniqueID, name);
+        long expirationTime = System.currentTimeMillis() + (plugin.getConfig().getInt("adverts.expiration-time", 86400) * 1000);
+
+        Advert advert = new Advert(uniqueID, name, expirationTime);
 
         advertAccount.addAdvert(advert);
         advertTask.queueAdvert(advert);
@@ -168,10 +170,16 @@ public class AdvertManager {
         return createAdvert(offlinePlayer.getUniqueId(), name);
     }
 
-    public void cancelAdvert(UUID uniqueID, String regionName) {
+    public void unScheduleAdvert(Advert advert) {
+        if (advertTask == null) return;
+
+        advertTask.removeAdvert(advert);
+    }
+
+    public void cancelAdvert(UUID uniqueID, String name) {
         if (!hasAccount(uniqueID)) return;
         AdvertAccount account = getAdvertAccount(uniqueID);
-        account.removeAdvert(regionName);
+        account.removeAdvert(name);
 
         if (account.getAdverts().isEmpty())
             deleteAccount(uniqueID);
@@ -180,8 +188,8 @@ public class AdvertManager {
     /**
      * Cancel an advert.
      */
-    public void cancelAdvert(OfflinePlayer offlinePlayer, String regionName) {
-        cancelAdvert(offlinePlayer.getUniqueId(), regionName);
+    public void cancelAdvert(OfflinePlayer offlinePlayer, String name) {
+        cancelAdvert(offlinePlayer.getUniqueId(), name);
     }
 
     /**

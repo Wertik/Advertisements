@@ -4,22 +4,18 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import space.devport.utils.commands.SubCommand;
 import space.devport.utils.commands.struct.ArgumentRange;
 import space.devport.utils.commands.struct.CommandResult;
-import space.devport.utils.commands.struct.Preconditions;
 import space.devport.utils.text.message.Message;
 import space.devport.wertik.advertisements.AdvertPlugin;
-import space.devport.wertik.advertisements.commands.CommandUtils;
+import space.devport.wertik.advertisements.commands.AdvertSubCommand;
 import space.devport.wertik.advertisements.system.struct.Advert;
 import space.devport.wertik.advertisements.system.struct.AdvertAccount;
 
-public class InfoSubCommand extends SubCommand {
+public class InfoSubCommand extends AdvertSubCommand {
 
-    public InfoSubCommand() {
-        super("info");
-        this.preconditions = new Preconditions()
-                .permissions("advertisements.info");
+    public InfoSubCommand(AdvertPlugin plugin) {
+        super(plugin, "info");
     }
 
     @Override
@@ -29,7 +25,7 @@ public class InfoSubCommand extends SubCommand {
 
         OfflinePlayer target;
         if (args.length > 0) {
-            target = CommandUtils.getTargetPlayer(sender, args[0]);
+            target = getPlugin().getCommandParser().parsePlayer(sender, args[0]);
 
             if (target == null) return CommandResult.FAILURE;
 
@@ -42,7 +38,7 @@ public class InfoSubCommand extends SubCommand {
             target = (Player) sender;
         }
 
-        AdvertAccount account = AdvertPlugin.getInstance().getAdvertManager().getAdvertAccount(target);
+        AdvertAccount account = getPlugin().getAdvertManager().getAdvertAccount(target);
 
         account.removeInvalid();
 

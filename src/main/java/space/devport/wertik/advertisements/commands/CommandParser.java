@@ -1,19 +1,23 @@
 package space.devport.wertik.advertisements.commands;
 
-import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import space.devport.wertik.advertisements.AdvertPlugin;
 
-@UtilityClass
-public class CommandUtils {
+public class CommandParser {
 
-    public OfflinePlayer getTargetPlayer(CommandSender sender, String targetName) {
+    private final AdvertPlugin plugin;
+
+    public CommandParser(AdvertPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    public OfflinePlayer parsePlayer(CommandSender sender, String targetName) {
         OfflinePlayer offlinePlayer = Bukkit.getPlayer(targetName);
 
         if (offlinePlayer == null) {
-            AdvertPlugin.getInstance().getLanguageManager().getPrefixed("Commands.Invalid-Player")
+            plugin.getLanguageManager().getPrefixed("Commands.Invalid-Player")
                     .replace("%param%", targetName)
                     .send(sender);
             return null;

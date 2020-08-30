@@ -5,8 +5,10 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import space.devport.utils.DevportPlugin;
-import space.devport.wertik.advertisements.bridge.ARMBridge;
+import space.devport.utils.UsageFlag;
+import space.devport.wertik.advertisements.bridge.RegionMarketBridge;
 import space.devport.wertik.advertisements.commands.AdvertsCommand;
+import space.devport.wertik.advertisements.commands.CommandParser;
 import space.devport.wertik.advertisements.commands.subcommands.BuySubCommand;
 import space.devport.wertik.advertisements.commands.subcommands.CancelSubCommand;
 import space.devport.wertik.advertisements.commands.subcommands.InfoSubCommand;
@@ -19,22 +21,18 @@ import java.text.SimpleDateFormat;
 public class AdvertPlugin extends DevportPlugin {
 
     @Getter
-    private static AdvertPlugin instance;
-
-    @Getter
     private AdvertManager advertManager;
-
-    @Getter
-    private ARMBridge bridge;
 
     @Getter
     private DateFormat dateFormat;
     @Getter
     private String durationFormat;
 
+    @Getter
+    private CommandParser commandParser;
+
     @Override
     public void onPluginEnable() {
-        instance = this;
 
         loadOptions();
 
@@ -46,17 +44,19 @@ public class AdvertPlugin extends DevportPlugin {
 
         new AdvertLanguage();
 
-        setupARM();
-        setupPAPI();
+        setupRegionMarket();
+        setupPlaceholders();
+
+        this.commandParser = new CommandParser(this);
 
         addMainCommand(new AdvertsCommand()
-                .addSubCommand(new ReloadSubCommand())
-                .addSubCommand(new BuySubCommand())
-                .addSubCommand(new CancelSubCommand())
-                .addSubCommand(new InfoSubCommand()));
+                .addSubCommand(new ReloadSubCommand(this))
+                .addSubCommand(new BuySubCommand(this))
+                .addSubCommand(new CancelSubCommand(this))
+                .addSubCommand(new InfoSubCommand(this)));
     }
 
-    private void setupPAPI() {
+    private void setupPlaceholders() {
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
 
             if (PlaceholderAPI.isRegistered("adverts") && compileVersionNumber(PlaceholderAPIPlugin.getInstance().getDescription().getVersion()) >= 2109) {
@@ -85,16 +85,14 @@ public class AdvertPlugin extends DevportPlugin {
         return versionNumber;
     }
 
-    private void setupARM() {
+    private void setupRegionMarket() {
         if (getServer().getPluginManager().getPlugin("AdvancedRegionMarket") != null) {
-            if (bridge != null) return;
             consoleOutput.info("Found &aAdvanced Region Market &7v&f" + getServer().getPluginManager().getPlugin("AdvancedRegionMarket").getDescription().getVersion());
-            bridge = new ARMBridge();
-            bridge.build();
+            RegionMarketBridge.getInstance().hook();
         } else {
-            if (bridge != null) {
+            if (RegionMarketBridge.getInstance().isHooked()) {
                 consoleOutput.warn("Uninstalled ARM, disabling bridge.");
-                bridge = null;
+                RegionMarketBridge.getInstance().unHook();
                 return;
             }
 
@@ -104,19 +102,22 @@ public class AdvertPlugin extends DevportPlugin {
     }
 
     private void loadOptions() {
-        this.dateFormat = new SimpleDateFormat(getConfig().getString("formats.date-format", "d.M. H:m:s"));
-        this.durationFormat = getConfig().getString("formats.duration-format", "H:m:s");
+        this.dateFormat = new SimpleDateFormat(getConfig().getString("formats.date-format", "d.M. HH:mm:ss"));
+        this.durationFormat = getConfig().getString("formats.duration-format", "HH:mm:ss");
     }
 
     @Override
     public void onPluginDisable() {
+        advertManager.getAdvertTask().stop();
+        advertManager.getAutoSave().stop();
+
         advertManager.save();
     }
 
     @Override
     public void onReload() {
-        setupARM();
-        setupPAPI();
+        setupRegionMarket();
+        setupPlaceholders();
 
         loadOptions();
 
@@ -125,17 +126,11 @@ public class AdvertPlugin extends DevportPlugin {
     }
 
     @Override
-    public boolean useLanguage() {
-        return true;
+    public UsageFlag[] usageFlags() {
+        return new UsageFlag[]{UsageFlag.CONFIGURATION, UsageFlag.COMMANDS, UsageFlag.LANGUAGE};
     }
 
-    @Override
-    public boolean useHolograms() {
-        return false;
-    }
-
-    @Override
-    public boolean useMenus() {
-        return false;
+    public static AdvertPlugin getInstance() {
+        return getPlugin(AdvertPlugin.class);
     }
 }
