@@ -32,7 +32,7 @@ public class AdvertAccount {
 
             if (advert.isExpired() ||
                     (AdvertPlugin.getInstance().getConfig().getBoolean("require-arm-market", false) &&
-                            RegionMarketBridge.getInstance().hasMarket(owner))) {
+                            !RegionMarketBridge.getInstance().hasMarket(owner))) {
 
                 advertIterator.remove();
                 advert.sendExpireNotification();
