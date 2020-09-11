@@ -88,11 +88,10 @@ public class AdvertTask implements Runnable {
     @Override
     public void run() {
 
-        if (loadedAdverts.isEmpty())
-            if (!queueAdverts()) {
-                plugin.getConsoleOutput().debug("Could not fetch any adverts.");
-                return;
-            }
+        if (loadedAdverts.isEmpty() && !queueAdverts()) {
+            plugin.getConsoleOutput().debug("Could not fetch any adverts.");
+            return;
+        }
 
         Advert advert = getNext();
 

@@ -67,6 +67,8 @@ public class AdvertExpansion extends PlaceholderExpansion {
                         long until = advert.getExpirationTime() - System.currentTimeMillis();
                         return DurationFormatUtils.formatDuration(until, plugin.getDurationFormat());
                     }
+                default:
+                    break;
             }
 
         return "invalid_params";

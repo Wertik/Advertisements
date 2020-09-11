@@ -57,22 +57,20 @@ public class AdvertPlugin extends DevportPlugin {
     }
 
     private void setupPlaceholders() {
-        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if (PlaceholderAPI.isRegistered("adverts") && compileVersionNumber(PlaceholderAPIPlugin.getInstance().getDescription().getVersion()) >= 2109 &&
+                getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            PlaceholderExpansion expansion = PlaceholderAPIPlugin.getInstance().getLocalExpansionManager().getExpansion("adverts");
 
-            if (PlaceholderAPI.isRegistered("adverts") && compileVersionNumber(PlaceholderAPIPlugin.getInstance().getDescription().getVersion()) >= 2109) {
-                PlaceholderExpansion expansion = PlaceholderAPIPlugin.getInstance().getLocalExpansionManager().getExpansion("adverts");
-
-                if (expansion != null) {
-                    if (compileVersionNumber(expansion.getVersion()) < compileVersionNumber(getDescription().getVersion())) {
-                        expansion.unregister();
-                        consoleOutput.info("Unregistered old expansion version...");
-                    }
+            if (expansion != null) {
+                if (compileVersionNumber(expansion.getVersion()) < compileVersionNumber(getDescription().getVersion())) {
+                    expansion.unregister();
+                    consoleOutput.info("Unregistered old expansion version...");
                 }
             }
-
-            new AdvertExpansion(this).register();
-            consoleOutput.info("Found PlaceholderAPI! &aRegistering expansion.");
         }
+
+        new AdvertExpansion(this).register();
+        consoleOutput.info("Found PlaceholderAPI! &aRegistering expansion.");
     }
 
     private int compileVersionNumber(String version) {

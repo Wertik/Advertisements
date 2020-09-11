@@ -9,14 +9,14 @@ public class RegionMarketBridge {
 
     private static RegionMarketBridge instance;
 
-    public static RegionMarketBridge getInstance() {
-        if (instance == null) instance = new RegionMarketBridge();
-        return instance;
-    }
-
     private AdvancedRegionMarket regionMarket;
 
     private RegionMarketBridge() {
+    }
+
+    public static RegionMarketBridge getInstance() {
+        if (instance == null) instance = new RegionMarketBridge();
+        return instance;
     }
 
     public boolean isHooked() {
