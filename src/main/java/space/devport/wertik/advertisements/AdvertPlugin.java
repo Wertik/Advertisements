@@ -6,6 +6,7 @@ import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import space.devport.utils.DevportPlugin;
 import space.devport.utils.UsageFlag;
+import space.devport.utils.utility.VersionUtil;
 import space.devport.wertik.advertisements.bridge.RegionMarketBridge;
 import space.devport.wertik.advertisements.commands.AdvertsCommand;
 import space.devport.wertik.advertisements.commands.CommandParser;
@@ -57,30 +58,20 @@ public class AdvertPlugin extends DevportPlugin {
     }
 
     private void setupPlaceholders() {
-        if (PlaceholderAPI.isRegistered("adverts") && compileVersionNumber(PlaceholderAPIPlugin.getInstance().getDescription().getVersion()) >= 2109 &&
-                getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if (PlaceholderAPI.isRegistered("adverts") &&
+                VersionUtil.compareVersions("2.10.9", getPluginManager().getPlugin("PlaceholderAPI").getDescription().getVersion()) < 1 &&
+                getPluginManager().getPlugin("PlaceholderAPI") != null) {
+
             PlaceholderExpansion expansion = PlaceholderAPIPlugin.getInstance().getLocalExpansionManager().getExpansion("adverts");
 
             if (expansion != null) {
-                if (compileVersionNumber(expansion.getVersion()) < compileVersionNumber(getDescription().getVersion())) {
-                    expansion.unregister();
-                    consoleOutput.info("Unregistered old expansion version...");
-                }
+                expansion.unregister();
+                consoleOutput.info("Unregistered old expansion version...");
             }
         }
 
         new AdvertExpansion(this).register();
         consoleOutput.info("Found PlaceholderAPI! &aRegistering expansion.");
-    }
-
-    private int compileVersionNumber(String version) {
-        int versionNumber = 0;
-        try {
-            versionNumber = Integer.parseInt(version.replace("\\.", ""));
-        } catch (NumberFormatException e) {
-            consoleOutput.debug("Not common version string.");
-        }
-        return versionNumber;
     }
 
     private void setupRegionMarket() {
