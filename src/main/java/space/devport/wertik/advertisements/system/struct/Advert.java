@@ -6,6 +6,7 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import space.devport.utils.text.language.LanguageManager;
 import space.devport.utils.text.message.Message;
 import space.devport.wertik.advertisements.AdvertPlugin;
 
@@ -38,7 +39,7 @@ public class Advert {
 
         if (!offlinePlayer.isOnline() || offlinePlayer.getPlayer() == null) return;
 
-        AdvertPlugin.getInstance().getLanguageManager().getPrefixed("Advert-Expired")
+        AdvertPlugin.getInstance().getManager(LanguageManager.class).getPrefixed("Advert-Expired")
                 .replace("%name%", name)
                 .send(offlinePlayer.getPlayer());
     }
@@ -70,7 +71,7 @@ public class Advert {
     public Message compose() {
         OfflinePlayer owner = Bukkit.getOfflinePlayer(this.owner);
 
-        Message template = AdvertPlugin.getInstance().getLanguageManager().get("Advert-Message");
+        Message template = AdvertPlugin.getInstance().getManager(LanguageManager.class).get("Advert-Message");
 
         return template.replace("%owner%", owner.getName());
     }

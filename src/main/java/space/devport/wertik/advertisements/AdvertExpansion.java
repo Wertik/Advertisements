@@ -5,6 +5,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import space.devport.utils.text.language.LanguageManager;
 import space.devport.wertik.advertisements.bridge.RegionMarketBridge;
 import space.devport.wertik.advertisements.system.struct.Advert;
 
@@ -75,7 +76,7 @@ public class AdvertExpansion extends PlaceholderExpansion {
     }
 
     public String getBooleanValue(boolean bool) {
-        return plugin.getLanguageManager().get("Placeholders." + (bool ? "Value-True" : "Value-False")).color().toString();
+        return plugin.getManager(LanguageManager.class).get("Placeholders." + (bool ? "Value-True" : "Value-False")).color().toString();
     }
 
     @Override

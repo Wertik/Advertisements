@@ -1,8 +1,13 @@
 package space.devport.wertik.advertisements;
 
+import space.devport.utils.DevportPlugin;
 import space.devport.utils.text.language.LanguageDefaults;
 
 public class AdvertLanguage extends LanguageDefaults {
+
+    public AdvertLanguage(DevportPlugin plugin) {
+        super(plugin);
+    }
 
     @Override
     public void setDefaults() {

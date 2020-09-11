@@ -42,7 +42,7 @@ public class AdvertPlugin extends DevportPlugin {
         advertManager.startAutoSave();
         advertManager.startAdvertTask();
 
-        new AdvertLanguage();
+        new AdvertLanguage(this);
 
         setupRegionMarket();
         setupPlaceholders();
@@ -85,8 +85,8 @@ public class AdvertPlugin extends DevportPlugin {
 
     private void setupRegionMarket() {
         if (getServer().getPluginManager().getPlugin("AdvancedRegionMarket") != null) {
-            consoleOutput.info("Found &aAdvanced Region Market &7v&f" + getServer().getPluginManager().getPlugin("AdvancedRegionMarket").getDescription().getVersion());
             RegionMarketBridge.getInstance().hook();
+            consoleOutput.info("Found &aAdvanced Region Market &7v&f" + getServer().getPluginManager().getPlugin("AdvancedRegionMarket").getDescription().getVersion());
         } else {
             if (RegionMarketBridge.getInstance().isHooked()) {
                 consoleOutput.warn("Uninstalled ARM, disabling bridge.");
