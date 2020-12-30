@@ -1,60 +1,50 @@
 package space.devport.wertik.advertisements.system;
 
-import com.google.common.base.Strings;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
+import space.devport.utils.utility.json.GsonHelper;
 import space.devport.wertik.advertisements.AdvertPlugin;
 import space.devport.wertik.advertisements.system.struct.Advert;
 import space.devport.wertik.advertisements.system.struct.AdvertAccount;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 
-@RequiredArgsConstructor
 public class AdvertManager {
 
     private final AdvertPlugin plugin;
 
     private final Map<UUID, AdvertAccount> cache = new LinkedHashMap<>();
 
-    private final Gson gson = new GsonBuilder()
-            // .setPrettyPrinting()
-            .create();
-
-    @Getter
-    private AutoSaveTask autoSave;
+    private final GsonHelper gsonHelper = new GsonHelper();
 
     @Getter
     private AdvertTask advertTask;
 
-    public void startAutoSave() {
-        if (plugin.getConfig().getBoolean("auto-save.enabled")) {
-            autoSave = new AutoSaveTask(plugin);
-            autoSave.load();
-            autoSave.start();
-        }
+    public AdvertManager(AdvertPlugin plugin) {
+        this.plugin = plugin;
     }
 
-    public void reloadAutoSave() {
+    @Getter
+    private BukkitTask autoSave;
+
+    public void stopAutoSave() {
         if (autoSave == null)
-            startAutoSave();
-        else
-            autoSave.stop();
+            return;
 
-        if (autoSave == null) return;
+        autoSave.cancel();
+        this.autoSave = null;
+    }
 
-        autoSave.load();
-        autoSave.start();
+    public void startAutoSave() {
+        stopAutoSave();
+
+        if (plugin.getConfig().getBoolean("auto-save.enabled", false)) {
+            long interval = plugin.getConfig().getInt("auto-save.interval", 300) * 20L;
+            this.autoSave = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::save, interval, interval);
+        }
     }
 
     public void startAdvertTask() {
@@ -154,7 +144,7 @@ public class AdvertManager {
 
         if (advertAccount.hasAdvert(name) || advertAccount.hasMax()) return false;
 
-        long expirationTime = System.currentTimeMillis() + (plugin.getConfig().getInt("adverts.expiration-time", 86400) * 1000);
+        long expirationTime = System.currentTimeMillis() + plugin.getConfig().getInt("adverts.expiration-time", 86400) * 1000L;
 
         Advert advert = new Advert(uniqueID, name, expirationTime);
 
@@ -197,10 +187,12 @@ public class AdvertManager {
      */
     public int purgeEmpty() {
         int count = 0;
-        for (UUID uniqueID : cache.keySet()) {
+        for (Iterator<UUID> iterator = cache.keySet().iterator(); iterator.hasNext(); ) {
+            UUID uniqueID = iterator.next();
+
             AdvertAccount advertAccount = cache.get(uniqueID);
-            advertAccount.removeInvalid();
-            if (advertAccount.getAdverts().isEmpty()) {
+
+            if (advertAccount.removeInvalid()) {
                 cache.remove(uniqueID);
                 count++;
             }
@@ -209,47 +201,28 @@ public class AdvertManager {
     }
 
     public void save() {
-        plugin.getConsoleOutput().info("Purged " + purgeEmpty() + " empty account(s)...");
+        plugin.getConsoleOutput().info(String.format("Purged %d empty account(s)...", purgeEmpty()));
 
         final Map<UUID, AdvertAccount> finalCache = new HashMap<>(cache);
 
-        plugin.getConsoleOutput().info("Saving " + finalCache.size() + " advert account(s)...");
-
-        String output = gson.toJson(finalCache, new TypeToken<Map<UUID, AdvertAccount>>() {
-        }.getType());
-
-        plugin.getConsoleOutput().debug("JSON: " + output);
-
-        Path path = Paths.get(plugin.getDataFolder().getPath() + "/data.json");
-
-        try {
-            Files.write(path, output.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        gsonHelper.save(finalCache, plugin.getDataFolder() + "/data.json")
+                .thenRunAsync(() -> plugin.getConsoleOutput().info(String.format("Saved %d user(s)...", finalCache.size())));
     }
 
     public void load() {
-        cache.clear();
+        gsonHelper.loadMapAsync(plugin.getDataFolder() + "/data.json", UUID.class, AdvertAccount.class).thenAcceptAsync(loaded -> {
+            if (loaded == null)
+                loaded = new HashMap<>();
 
-        Path path = Paths.get(plugin.getDataFolder().getPath() + "/data.json");
+            cache.clear();
+            cache.putAll(loaded);
 
-        if (!Files.exists(path)) return;
-
-        String input;
-        try {
-            input = String.join("", Files.readAllLines(path));
-        } catch (IOException e) {
+            plugin.getConsoleOutput().info(String.format("Loaded %d advert account(s) with %d advert(s)...", loaded.size(), collectAdverts().size()));
+        }).exceptionally(e -> {
+            plugin.getConsoleOutput().err("Could not load users: " + e.getMessage());
             e.printStackTrace();
-            return;
-        }
-
-        if (Strings.isNullOrEmpty(input)) return;
-
-        cache.putAll(gson.fromJson(input, new TypeToken<Map<UUID, AdvertAccount>>() {
-        }.getType()));
-
-        plugin.getConsoleOutput().info("Loaded " + cache.size() + " advert account(s) with " + collectAdverts().size() + " advert(s)...");
+            return null;
+        });
     }
 
     /**

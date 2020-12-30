@@ -6,7 +6,6 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import space.devport.utils.text.language.LanguageManager;
-import space.devport.wertik.advertisements.bridge.RegionMarketBridge;
 import space.devport.wertik.advertisements.system.struct.Advert;
 
 import java.util.Date;
@@ -40,8 +39,8 @@ public class AdvertExpansion extends PlaceholderExpansion {
         if (arr.length > 0)
             switch (arr[0].toLowerCase()) {
                 case "hasmarket":
-                    if (!RegionMarketBridge.getInstance().isHooked()) return "no_arm";
-                    return getBooleanValue(RegionMarketBridge.getInstance().hasMarket(player));
+                    if (!plugin.getBridge().isHooked()) return "no_arm";
+                    return getBooleanValue(plugin.getBridge().hasMarket(player));
                 case "hasadverts":
                     return getBooleanValue(plugin.getAdvertManager().hasAdverts(player));
                 case "adverts":

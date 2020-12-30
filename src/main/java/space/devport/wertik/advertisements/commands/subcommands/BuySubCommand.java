@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import space.devport.utils.commands.struct.ArgumentRange;
 import space.devport.utils.commands.struct.CommandResult;
 import space.devport.wertik.advertisements.AdvertPlugin;
-import space.devport.wertik.advertisements.bridge.RegionMarketBridge;
 import space.devport.wertik.advertisements.commands.AdvertSubCommand;
 import space.devport.wertik.advertisements.system.struct.AdvertAccount;
 
@@ -24,7 +23,7 @@ public class BuySubCommand extends AdvertSubCommand {
 
         OfflinePlayer target;
         if (args.length > 1) {
-            target = getPlugin().getCommandParser().parsePlayer(sender, args[1]);
+            target = plugin.getCommandParser().parsePlayer(sender, args[1]);
 
             if (target == null) return CommandResult.FAILURE;
             others = true;
@@ -34,24 +33,24 @@ public class BuySubCommand extends AdvertSubCommand {
             target = (Player) sender;
         }
 
-        if (getPlugin().getConfig().getBoolean("require-arm-market", false)) {
-            if (!RegionMarketBridge.getInstance().isHooked()) {
+        if (plugin.getConfig().getBoolean("require-arm-market", false)) {
+            if (!plugin.getBridge().isHooked()) {
                 language.sendPrefixed(sender, "Commands.ARM-Not-Hooked");
                 return CommandResult.FAILURE;
             }
 
-            if (!RegionMarketBridge.getInstance().hasMarket(target)) {
+            if (!plugin.getBridge().hasMarket(target)) {
                 language.sendPrefixed(sender, "Commands.Buy.No-Market");
                 return CommandResult.FAILURE;
             }
         }
 
-        AdvertAccount account = getPlugin().getAdvertManager().getAdvertAccount(target);
+        AdvertAccount account = plugin.getAdvertManager().getAdvertAccount(target);
 
         if (account.hasMax()) {
             language.getPrefixed("Commands.Buy.Limit-Reached")
                     .replace("%amount%", account.getAdverts().size())
-                    .replace("%max%", getPlugin().getConfig().getInt("adverts.limit", 1))
+                    .replace("%max%", plugin.getConfig().getInt("adverts.limit", 1))
                     .send(sender);
             return CommandResult.FAILURE;
         }
@@ -63,7 +62,7 @@ public class BuySubCommand extends AdvertSubCommand {
             return CommandResult.FAILURE;
         }
 
-        if (!getPlugin().getAdvertManager().createAdvert(target, args[0])) {
+        if (!plugin.getAdvertManager().createAdvert(target, args[0])) {
             language.sendPrefixed(sender, "Commands.Buy.Could-Not-Create");
             return CommandResult.FAILURE;
         }

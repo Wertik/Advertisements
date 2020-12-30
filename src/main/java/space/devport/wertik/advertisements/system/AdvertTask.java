@@ -67,7 +67,8 @@ public class AdvertTask implements Runnable {
 
     private Advert getNext() {
 
-        if (loadedAdverts.isEmpty()) return null;
+        if (loadedAdverts.isEmpty())
+            return null;
 
         Advert advert;
         try {

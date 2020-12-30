@@ -7,16 +7,9 @@ import java.util.UUID;
 
 public class RegionMarketBridge {
 
-    private static RegionMarketBridge instance;
-
     private AdvancedRegionMarket regionMarket;
 
-    private RegionMarketBridge() {
-    }
-
-    public static RegionMarketBridge getInstance() {
-        if (instance == null) instance = new RegionMarketBridge();
-        return instance;
+    public RegionMarketBridge() {
     }
 
     public boolean isHooked() {

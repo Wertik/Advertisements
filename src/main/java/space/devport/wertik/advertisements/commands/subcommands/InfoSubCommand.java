@@ -25,7 +25,7 @@ public class InfoSubCommand extends AdvertSubCommand {
 
         OfflinePlayer target;
         if (args.length > 0) {
-            target = getPlugin().getCommandParser().parsePlayer(sender, args[0]);
+            target = plugin.getCommandParser().parsePlayer(sender, args[0]);
 
             if (target == null) return CommandResult.FAILURE;
 
@@ -38,7 +38,7 @@ public class InfoSubCommand extends AdvertSubCommand {
             target = (Player) sender;
         }
 
-        AdvertAccount account = getPlugin().getAdvertManager().getAdvertAccount(target);
+        AdvertAccount account = plugin.getAdvertManager().getAdvertAccount(target);
 
         account.removeInvalid();
 

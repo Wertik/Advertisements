@@ -2,7 +2,7 @@
 #
 # Version: ${project.version}
 
-plugin-prefix: '&aAdverts &8>> '
+plugin-prefix: '&eAdverts &8| '
 debug-enabled: false
 
 # Whether or not to require an AdvancedRegionMarket market.

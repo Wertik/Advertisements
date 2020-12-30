@@ -1,9 +1,7 @@
 package space.devport.wertik.advertisements;
 
 import lombok.Getter;
-import me.clip.placeholderapi.PlaceholderAPI;
-import me.clip.placeholderapi.PlaceholderAPIPlugin;
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.plugin.Plugin;
 import space.devport.utils.DevportPlugin;
 import space.devport.utils.UsageFlag;
 import space.devport.utils.utility.VersionUtil;
@@ -32,21 +30,23 @@ public class AdvertPlugin extends DevportPlugin {
     @Getter
     private CommandParser commandParser;
 
+    @Getter
+    private AdvertExpansion expansion;
+
+    @Getter
+    private final RegionMarketBridge bridge = new RegionMarketBridge();
+
     @Override
     public void onPluginEnable() {
-
         loadOptions();
 
         advertManager = new AdvertManager(this);
         advertManager.load();
 
-        advertManager.startAutoSave();
-        advertManager.startAdvertTask();
-
         new AdvertLanguage(this);
 
-        setupRegionMarket();
-        setupPlaceholders();
+        registerRegionMarket();
+        registerPlaceholders();
 
         this.commandParser = new CommandParser(this);
 
@@ -55,33 +55,42 @@ public class AdvertPlugin extends DevportPlugin {
                 .addSubCommand(new BuySubCommand(this))
                 .addSubCommand(new CancelSubCommand(this))
                 .addSubCommand(new InfoSubCommand(this)));
+
+        advertManager.startAutoSave();
+        advertManager.startAdvertTask();
     }
 
-    private void setupPlaceholders() {
-        if (PlaceholderAPI.isRegistered("adverts") &&
-                VersionUtil.compareVersions("2.10.9", getPluginManager().getPlugin("PlaceholderAPI").getDescription().getVersion()) < 1 &&
-                getPluginManager().getPlugin("PlaceholderAPI") != null) {
+    private void unregisterPlaceholders() {
+        Plugin papiPlugin = getPluginManager().getPlugin("PlaceholderAPI");
+        if (papiPlugin != null &&
+                expansion != null &&
+                expansion.isRegistered() &&
+                VersionUtil.compareVersions("2.10.9", papiPlugin.getDescription().getVersion()) < 1) {
 
-            PlaceholderExpansion expansion = PlaceholderAPIPlugin.getInstance().getLocalExpansionManager().getExpansion("adverts");
-
-            if (expansion != null) {
-                expansion.unregister();
-                consoleOutput.info("Unregistered old expansion version...");
-            }
+            expansion.unregister();
+            consoleOutput.info("Unregistered old expansion...");
         }
+    }
 
-        new AdvertExpansion(this).register();
+    private void registerPlaceholders() {
+        unregisterPlaceholders();
+
+        if (expansion == null)
+            this.expansion = new AdvertExpansion(this);
+
+        expansion.register();
         consoleOutput.info("Found PlaceholderAPI! &aRegistering expansion.");
     }
 
-    private void setupRegionMarket() {
-        if (getServer().getPluginManager().getPlugin("AdvancedRegionMarket") != null) {
-            RegionMarketBridge.getInstance().hook();
-            consoleOutput.info("Found &aAdvanced Region Market &7v&f" + getServer().getPluginManager().getPlugin("AdvancedRegionMarket").getDescription().getVersion());
+    private void registerRegionMarket() {
+        Plugin armPlugin = getServer().getPluginManager().getPlugin("AdvancedRegionMarket");
+        if (armPlugin != null) {
+            bridge.hook();
+            consoleOutput.info("Found &aAdvanced Region Market &7v&f" + armPlugin.getDescription().getVersion());
         } else {
-            if (RegionMarketBridge.getInstance().isHooked()) {
+            if (bridge.isHooked()) {
                 consoleOutput.warn("Uninstalled ARM, disabling bridge.");
-                RegionMarketBridge.getInstance().unHook();
+                bridge.unHook();
                 return;
             }
 
@@ -91,26 +100,26 @@ public class AdvertPlugin extends DevportPlugin {
     }
 
     private void loadOptions() {
-        this.dateFormat = new SimpleDateFormat(getConfig().getString("formats.date-format", "d.M. HH:mm:ss"));
+        this.dateFormat = new SimpleDateFormat(getConfiguration().getString("formats.date-format", "d.M. HH:mm:ss"));
         this.durationFormat = getConfig().getString("formats.duration-format", "HH:mm:ss");
     }
 
     @Override
     public void onPluginDisable() {
         advertManager.getAdvertTask().stop();
-        advertManager.getAutoSave().stop();
+        advertManager.stopAutoSave();
 
         advertManager.save();
     }
 
     @Override
     public void onReload() {
-        setupRegionMarket();
-        setupPlaceholders();
+        registerRegionMarket();
+        registerPlaceholders();
 
         loadOptions();
 
-        advertManager.reloadAutoSave();
+        advertManager.startAutoSave();
         advertManager.reloadAdvertTask();
     }
 

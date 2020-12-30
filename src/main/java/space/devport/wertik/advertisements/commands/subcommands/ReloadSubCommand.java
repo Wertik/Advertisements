@@ -15,7 +15,7 @@ public class ReloadSubCommand extends AdvertSubCommand {
 
     @Override
     protected CommandResult perform(CommandSender sender, String label, String[] args) {
-        getPlugin().reload(sender);
+        plugin.reload(sender);
         return CommandResult.SUCCESS;
     }
 

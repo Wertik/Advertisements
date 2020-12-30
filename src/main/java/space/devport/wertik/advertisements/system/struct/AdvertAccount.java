@@ -25,21 +25,22 @@ public class AdvertAccount {
         this.lastKnownName = Bukkit.getOfflinePlayer(owner).getName();
     }
 
-    public void removeInvalid() {
-        Iterator<Advert> advertIterator = adverts.iterator();
-        while (advertIterator.hasNext()) {
-            Advert advert = advertIterator.next();
+    public boolean removeInvalid() {
+        for (Iterator<Advert> iterator = adverts.iterator(); iterator.hasNext(); ) {
+            AdvertPlugin plugin = AdvertPlugin.getInstance();
+            Advert advert = iterator.next();
 
             if (advert.isExpired() ||
-                    (AdvertPlugin.getInstance().getConfig().getBoolean("require-arm-market", false) &&
-                            !RegionMarketBridge.getInstance().hasMarket(owner))) {
+                    (plugin.getConfig().getBoolean("require-arm-market", false) &&
+                            !plugin.getBridge().hasMarket(owner))) {
 
-                advertIterator.remove();
+                adverts.remove(advert);
                 advert.sendExpireNotification();
 
-                AdvertPlugin.getPlugin(AdvertPlugin.class).getAdvertManager().unScheduleAdvert(advert);
+                plugin.getAdvertManager().unScheduleAdvert(advert);
             }
         }
+        return adverts.isEmpty();
     }
 
     public void removeAdvert(String advertName) {
@@ -53,7 +54,7 @@ public class AdvertAccount {
                 advertIterator.remove();
                 advert.sendExpireNotification();
 
-                AdvertPlugin.getPlugin(AdvertPlugin.class).getAdvertManager().unScheduleAdvert(advert);
+                AdvertPlugin.getInstance().getAdvertManager().unScheduleAdvert(advert);
             }
         }
     }

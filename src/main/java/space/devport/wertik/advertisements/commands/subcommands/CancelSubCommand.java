@@ -23,7 +23,7 @@ public class CancelSubCommand extends AdvertSubCommand {
 
         OfflinePlayer target;
         if (args.length > 1) {
-            target = getPlugin().getCommandParser().parsePlayer(sender, args[1]);
+            target = plugin.getCommandParser().parsePlayer(sender, args[1]);
 
             if (target == null) return CommandResult.FAILURE;
 
@@ -36,7 +36,7 @@ public class CancelSubCommand extends AdvertSubCommand {
             target = (Player) sender;
         }
 
-        AdvertAccount account = getPlugin().getAdvertManager().getAdvertAccount(target);
+        AdvertAccount account = plugin.getAdvertManager().getAdvertAccount(target);
 
         if (!account.hasAdvert(args[0])) {
             language.getPrefixed(others ? "Commands.None-Others" : "Commands.None")
